@@ -5,7 +5,7 @@ import random
 DEGREE = 6
 MIN_WEIGHT = 1
 MAX_WEIGHT = 50
-num_vertex = 100
+num_vertex = 1000
 
 class Graph:
 
@@ -55,24 +55,23 @@ class Graph_six_degree(Graph):
     def connect(self):
         """
         randomly connect to other vertexes
-        BUG: sometimes, a group of vertices forms a clique that prevent
-            other point from connecting, and hence causes it is impossible
-            to connect
         """
-        candicate = [i for i in range(self.num_vertex)]
-        while len(candicate) > 1:
-            v = random.choice(candicate)
-            u = random.choice(candicate)
+        for d in range(DEGREE):
+            candicate = [i for i in range(self.num_vertex)]
+            while len(candicate) > 1:
+                v = random.choice(candicate)
+                u = random.choice(candicate)
 
-            # skip self connection or already connected
-            if v == u or self.getWeight(v,u) > 0:
-                continue
+                # skip self connection or already connected
+                if v == u or self.getWeight(v,u) > 0:
+                    continue
 
-            self.setEdge(v, u, random.randint(MIN_WEIGHT, MAX_WEIGHT))
-            for elm in [v, u]:
-                self.degreeTable[elm] += 1
-                if self.degreeTable[elm] >= DEGREE:
-                    candicate.remove(elm)
+                self.setEdge(v, u, random.randint(MIN_WEIGHT, MAX_WEIGHT))
+                for elm in [v, u]:
+                    self.degreeTable[elm] += 1
+                    if self.degreeTable[elm] >= d:
+                        candicate.remove(elm)
+                #print candicate, v,u
         for d in self.degreeTable:
             if d != DEGREE:
                 print self.degreeTable
@@ -100,7 +99,6 @@ def main():
 
     print "STEP1: Generate graphs"
     g1 = Graph_six_degree(num_vertex)
-    g1.dump()
     g2 = Graph_random_connect20(num_vertex)
 
 if __name__ == '__main__':
