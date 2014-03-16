@@ -7,6 +7,9 @@ class Heap:
         # array item type: tuple, (id, value)
         self.array = [(0,-1)]
 
+    def __len__(self):
+        return len(self.array) -1
+
     def getMin(self):
         return self.array[1]
 
@@ -24,7 +27,7 @@ class Heap:
             self.adjust(int(i_parent/2), i_parent)
 
     def delete_root(self):
-        if len(self.array) < 1:
+        if len(self) < 0:
             return
 
         root_index = 1
@@ -33,6 +36,10 @@ class Heap:
         self.downAdjust(root_index)
 
     def downAdjust(self, index):
+        # check if index has been the lowest leave
+        if index*2 > len(self):
+            return
+
         #print self.array, index
         smaller_index = index*2
         c1 = self.array[index*2][1]
@@ -55,10 +62,13 @@ def main():
     h = Heap()
     x = range(10)
     random.shuffle(x)
-    x = zip(range(5), [1,3,5,8,1])
-    for i in range(10):
+    x = zip(range(10), [1,3,5,8,1,2,2,2,2,5])
+    for i in x:
         h.insert(i)
-    h.delete_root()
+    print h.array
+    print "DELETE"
+    for i in range(len(h)):
+        h.delete_root()
     print h.array
 
 if __name__ == '__main__':
