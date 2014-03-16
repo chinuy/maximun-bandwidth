@@ -9,10 +9,45 @@ num_vertex = 1000
 
 class Graph:
 
+    def feasibility(self, n, degree):
+        total_edge = (n-1+1) * (n-1)/2
+        if total_edge < degree * n/2:
+            raise Exception("Too few edges to meet the criteria")
+
     def __init__(self, n):
+        self.feasibility(n, DEGREE)
         self.matrix = self.array_init(n, n, 0)
         self.degreeTable = [0 for i in range(n)]
         self.vertex = [i for i in range(n)]
+
+    def __iter__(self):
+        self.current = (0,0)
+        return self
+
+    def next(self):
+        v = self.current[0]
+        u = self.current[1]
+
+        u +=1
+        if u >= len(self.matrix[v]):
+            u = 0
+            v +=1
+
+        if v >= len(self.matrix):
+            raise StopIteration
+        else:
+            edge_id = (v, u)
+            edge_weight = self.getWeight(v, u)
+            self.current = (v,u)
+            return (edge_id, edge_weight)
+
+    def __len__(self):
+        count = 0
+        for row in self.matrix:
+            for elm in row:
+                if elm > 0:
+                    count += 1
+        return count
 
     def setEdge(self, v1, v2, weight = 1):
         if v2 > v1:
