@@ -42,51 +42,46 @@ class Dijkstra_with_heap(Dijkstra):
 class Kruskal_with_heap():
 
     def __init__(self, n):
-        self.g = graph.Graph_six_degree(n)
+        self.g = graph.Graph_random_connect20(n)
         self.h= heap.Heap()
         for e in self.g:
             self.h.insert(e)
 
     def solve(self):
-        while(len(self.h)>0):
-            ((v1, v2), w) = self.h.getMin()
-            print v1, v2, w
-            self.h.delete_root()
+        num_vertex = NUM_VERTEX
+        t = graph.Graph(num_vertex)
+
+        v = []
+        for i in range(num_vertex):
+          v.append(makeSet(i))
+
+        root = v[0] #temp set the root to the first node
+        while len(self.h) > 0:
+          e = self.h.getMin()
+          ((v1, v2), weight) = e
+          self.h.delete_root()
+          if weight == 0:
+            continue
+          r1 = find(v[v1])
+          r2 = find(v[v2])
+          if r1 != r2:
+            t.setWeight(v1, v2, weight)
+            union(r1, r2)
+
+          if r1.rank > root.rank:
+            root = r1
+          if r2.rank > root.rank:
+            root = r2
+
+        print root
+        t.dump()
+        t.BFS(root)
+        print t.traverse
+
 
 def main():
-    #problem = Kruskal_with_heap(NUM_VERTEX)
-    #problem.solve()
-
-    g = graph.Graph_random_connect20(NUM_VERTEX)
-    #g.dump()
-
-    num_vertex = NUM_VERTEX
-    t = graph.Graph(num_vertex)
-
-    v = []
-    for i in range(num_vertex):
-      v.append(makeSet(i))
-
-    root = v[0] #temp set the root to the first node
-    for e in g:
-      ((v1, v2), weight) = e
-      if weight == 0:
-        continue
-      r1 = find(v[v1])
-      r2 = find(v[v2])
-      if r1 != r2:
-        t.setWeight(v1, v2, weight)
-        union(r1, r2)
-
-      if r1.rank > root.rank:
-        root = r1
-      if r2.rank > root.rank:
-        root = r2
-
-    print root
-    t.dump()
-    t.BFS(root)
-    print t.traverse
+    problem = Kruskal_with_heap(NUM_VERTEX)
+    problem.solve()
 
 if __name__ == '__main__':
     main()
