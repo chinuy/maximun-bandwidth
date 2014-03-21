@@ -160,28 +160,37 @@ class Graph_six_degree(Graph):
 
     def connect(self):
         """
-        randomly connect to other vertexes
+        repeat until all vertex meet the DEGREE
         """
-        for d in range(DEGREE):
-            candicate = [i for i in range(self.num_vertex)]
-            while len(candicate) > 1:
-                v = random.choice(candicate)
-                u = random.choice(candicate)
+        i = 0
+        while i < len(self.degreeTable):
+            if self.degreeTable[i] != DEGREE:
+                i = 0
+                self.generate_connection()
+            i += 1
 
-                # skip self connection or already connected
-                if v == u or self.getWeight(v,u) > 0:
-                    continue
+    def generate_connection(self):
+        # reset information
+        self.degreeTable = [0 for i in range(self.num_vertex)]
+        self.matrix = self.array_init(self.num_vertex, 0)
+        candicate = [i for i in range(self.num_vertex)]
 
-                self.setWeight(v, u, random.randint(MIN_WEIGHT, MAX_WEIGHT))
-                for elm in [v, u]:
-                    self.degreeTable[elm] += 1
-                    if self.degreeTable[elm] >= d:
-                        candicate.remove(elm)
-                #print candicate, v,u
-        for d in self.degreeTable:
-            if d != DEGREE:
-                print self.degreeTable
-                raise Exception("Fail to generate the map of six degree")
+        RETRY = self.num_vertex * DEGREE * 10
+        retry_counter = 0
+        while len(candicate) > 1 and retry_counter < RETRY:
+            retry_counter += 1
+            v = random.choice(candicate)
+            u = random.choice(candicate)
+
+            # skip self connection or already connected
+            if v == u or self.getWeight(v,u) > 0:
+                continue
+
+            self.setWeight(v, u, random.randint(MIN_WEIGHT, MAX_WEIGHT))
+            for elm in [v, u]:
+                self.degreeTable[elm] += 1
+                if self.degreeTable[elm] >= DEGREE:
+                    candicate.remove(elm)
 
 class Graph_random_connect20(Graph):
 
@@ -202,10 +211,9 @@ class Graph_random_connect20(Graph):
 
 def main():
 
-    print "STEP1: Generate graphs"
-    #g1 = Graph_six_degree(NUM_VERTEX)
-    g2 = Graph_random_connect20(NUM_VERTEX)
-    g2.dump()
+    g1 = Graph_six_degree(NUM_VERTEX)
+    g1.dump()
+    print g1.degreeTable
 
 if __name__ == '__main__':
     main()
