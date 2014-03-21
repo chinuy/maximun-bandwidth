@@ -29,7 +29,7 @@ class Graph:
         self.color = [] # for DFS
 
     def __iter__(self):
-        self.current = (0,0)
+        self.current = (0,-1)
         return self
 
     def next(self):
