@@ -6,7 +6,7 @@ from collections import deque
 DEGREE = 6
 MIN_WEIGHT = 1
 MAX_WEIGHT = 50
-NUM_VERTEX = 10
+NUM_VERTEX = 5000
 
 class Node:
 
@@ -96,7 +96,10 @@ class Graph:
         return matrix
 
     def dump(self):
+        counter_row = 0
         for row in self.matrix:
+            print counter_row,
+            counter_row += 1
             for elm in row:
                 print "{0:>02}".format(elm),
             print
@@ -108,9 +111,9 @@ class Graph:
       v_list = range(self.num_vertex)
       for i in v_list:
         self.color.append('white')
-      self.color[v] = 'black'
+      self.traverse = []
+      self.DFS_util(v)
 
-      self.traverse = [v]
       for i in v_list:
         if self.color[i] == 'white':
           self.DFS_util(i)
@@ -143,8 +146,8 @@ class Graph:
           w = q.popleft()
           if self.color[w] == 'white':
             self.traverse.append(w)
+            self.color[w] = 'black'
             q.extend(self.getNeighborVertex(v))
-          self.color[w] = 'black'
 
 class Graph_six_degree(Graph):
 
