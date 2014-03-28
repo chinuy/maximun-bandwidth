@@ -149,6 +149,15 @@ class Graph:
             self.color[w] = 'black'
             q.extend(self.getNeighborVertex(v))
 
+    def traceback(self, s, t):
+        v = t
+        self.traverse = []
+        while v is not s:
+            self.traverse.append(v)
+            v = self.parent[v]
+        self.traverse.append(v)
+        self.traverse.reverse()
+
 class Graph_six_degree(Graph):
 
     def __init__(self, n):
