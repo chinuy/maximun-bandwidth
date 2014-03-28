@@ -57,9 +57,43 @@ class Heap:
         self.array[a], self.array[b] = self.array[b], self.array[a]
         return
 
+class MaxHeap(Heap):
+
+    def __init__(self):
+        # array item type: tuple, (id, value)
+        self.array = [(0,sys.maxint)]
+
+    def getMin(self):
+        raise Exception("MaxHeap doesn't support getMin()")
+
+    def getMax(self):
+        return self.array[1]
+
+    def adjust(self, i_parent, i_child):
+        if self.array[i_parent][1] < self.array[i_child][1]:
+            self.swap(i_parent, i_child)
+            self.adjust(int(i_parent/2), i_parent)
+
+    def downAdjust(self, index):
+        # check if index has been the lowest leave
+        if index*2 > len(self):
+            return
+
+        larger_index = index*2
+        c1 = self.array[index*2][1]
+        c2 = sys.maxsize
+        if len(self.array) > index*2 +1:
+            c2 = self.array[index*2+1][1]
+        if c1 > c2:
+            larger_index = index*2 +1
+
+        if self.array[index][1] < self.array[larger_index][1]:
+            self.swap(index, larger_index)
+            self.downAdjust(larger_index)
+
 def main():
 
-    h = Heap()
+    h = MaxHeap()
     x = range(10)
     random.shuffle(x)
     x = zip(range(10), [1,3,5,8,1,2,2,2,2,5])
@@ -70,6 +104,10 @@ def main():
     for i in range(len(h)):
         h.delete_root()
     print h.array
+    try:
+        h.getMin()
+    except Exception as e:
+        print e
 
 if __name__ == '__main__':
     main()

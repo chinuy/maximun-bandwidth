@@ -2,7 +2,7 @@ import graph
 import heap
 import random
 
-NUM_VERTEX = 100
+NUM_VERTEX = 10
 
 def makeSet(v):
   return graph.Node(v)
@@ -54,7 +54,7 @@ class Kruskal_with_heap():
 
         self.amend_gap(self.source, self.sink)
 
-        self.h= heap.Heap()
+        self.h= heap.MaxHeap()
         for e in self.g:
             self.h.insert(e)
 
@@ -82,7 +82,7 @@ class Kruskal_with_heap():
 
         root = v[0] #temp set the root to the first node
         while len(self.h) > 0:
-          e = self.h.getMin()
+          e = self.h.getMax()
           ((v1, v2), weight) = e
           self.h.delete_root()
           if weight == 0:
