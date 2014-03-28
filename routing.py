@@ -59,7 +59,50 @@ class GraphProblem:
 
 
 class Dijkstra_without_heap(GraphProblem):
-    pass
+
+    def __init__(self, input_graph):
+        GraphProblem.__init__(self, input_graph)
+
+    def solve(self):
+        frige = []
+        self.g.parent = []
+        bandwidth = []
+        for i in range(self.g.num_vertex):
+            self.g.parent.append(None)
+            bandwidth.append(-sys.maxint)
+
+        bandwidth[self.source] = sys.maxint
+
+        for v in self.g.getNeighborVertex(self.source):
+            self.g.parent[v] = self.source
+            bandwidth[v] = self.g.getWeight(self.source, v)
+            frige.append(v)
+
+        while bandwidth[self.sink] <= -sys.maxint and \
+                self.sink not in frige:
+
+            _max_b = -sys.maxint
+            _max_i = None
+            for i in range(len(frige)):
+                if _max_b < bandwidth[frige[i]]:
+                    _max_b = bandwidth[frige[i]]
+                    _max_i= i
+            u = frige[_max_i]
+            del frige[_max_i]
+
+            for w in self.g.getNeighborVertex(u):
+                bandwidth_of_u_w = self.g.getWeight(u, w)
+                if bandwidth[w] == -sys.maxint:
+                    self.g.parent[w] = u
+                    bandwidth[w] = min(bandwidth[u], bandwidth_of_u_w)
+                    frige.append(w)
+                elif w in frige and bandwidth[w] < min(bandwidth[u],\
+                        bandwidth_of_u_w):
+                    self.g.parent[w] = u
+                    bandwidth[w] = min(bandwidth[u], bandwidth_of_u_w)
+
+        self.g.traceback(self.source, self.sink)
+        print self.g.traverse
 
 class Dijkstra_with_heap(GraphProblem):
 
@@ -150,7 +193,7 @@ def randomSourceSink(n):
 def main():
     for i in range(5):
         print "-- Run --",i
-        problem = Dijkstra_with_heap(graph.Graph_six_degree(NUM_VERTEX))
+        problem = Dijkstra_without_heap(graph.Graph_six_degree(NUM_VERTEX))
         problem.setSourceSink(*randomSourceSink(NUM_VERTEX))
         #problem.g.dump()
         problem.solve()
