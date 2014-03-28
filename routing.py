@@ -1,8 +1,9 @@
 import graph
 import heap
 import random
+import sys
 
-NUM_VERTEX = 10
+NUM_VERTEX = 100
 
 def makeSet(v):
   return graph.Node(v)
@@ -31,32 +32,16 @@ def union(v1, v2):
     v1.rank = v2.rank + 1
 
 
-class Dijkstra:
-    pass
+class GraphProblem:
 
-class Dijkstra_without_heap(Dijkstra):
-    pass
+    def __init__(self, input_graph):
+        self.g = input_graph
 
-class Dijkstra_with_heap(Dijkstra):
-    pass
-
-class Kruskal_with_heap():
-
-    def __init__(self, n):
-        self.g = graph.Graph_six_degree(n)
-
-        self.source = random.randint(0,n-1)
-        self.sink = random.randint(0,n-1)
-        if self.source == self.sink:
-          self.sink += 1 # simply prevent source and sink are the same
-        print "S:", self.source
-        print "T:", self.sink
+    def setSourceSink(self, source, sink):
+        self.source = source
+        self.sink = sink
 
         self.amend_gap(self.source, self.sink)
-
-        self.h= heap.MaxHeap()
-        for e in self.g:
-            self.h.insert(e)
 
     def amend_gap(self, v1, v2):
 
@@ -72,12 +57,62 @@ class Kruskal_with_heap():
           prev_v = v
         print "Edges added:",counter_added_edge
 
+
+class Dijkstra_without_heap(GraphProblem):
+    pass
+
+class Dijkstra_with_heap(GraphProblem):
+
+    def __init__(self, input_graph):
+        GraphProblem.__init__(self, input_graph)
+
     def solve(self):
-        num_vertex = NUM_VERTEX
-        t = graph.Graph(num_vertex)
+        frige = heap.MaxHeap()
+        self.g.parent = []
+        bandwidth = []
+        for i in range(self.g.num_vertex):
+            self.g.parent.append(None)
+            bandwidth.append(-sys.maxint)
+
+        bandwidth[self.source] = sys.maxint
+
+        for v in self.g.getNeighborVertex(self.source):
+            self.g.parent[v] = self.source
+            bandwidth[v] = self.g.getWeight(self.source, v)
+            frige.insert((v,bandwidth[v]))
+
+        while bandwidth[self.sink] <= -sys.maxint and \
+                self.sink not in frige:
+            u = frige.getMax()[0]
+            frige.delete_root()
+            for w in self.g.getNeighborVertex(u):
+                bandwidth_of_u_w = self.g.getWeight(u, w)
+                if bandwidth[w] == -sys.maxint:
+                    self.g.parent[w] = u
+                    bandwidth[w] = min(bandwidth[u], bandwidth_of_u_w)
+                    frige.insert((w, bandwidth[w]))
+                elif w in frige and bandwidth[w] < min(bandwidth[u],\
+                        bandwidth_of_u_w):
+                    self.g.parent[w] = u
+                    bandwidth[w] = min(bandwidth[u], bandwidth_of_u_w)
+
+        self.g.traceback(self.source, self.sink)
+        print self.g.traverse
+
+class Kruskal_with_heap(GraphProblem):
+
+
+    def __init__(self, input_graph):
+        GraphProblem.__init__(self, input_graph)
+        self.h= heap.MaxHeap()
+        for e in self.g:
+            self.h.insert(e)
+
+    def solve(self):
+        t = graph.Graph(self.g.num_vertex)
 
         v = []
-        for i in range(num_vertex):
+        for i in range(self.g.num_vertex):
           v.append(makeSet(i))
 
         root = v[0] #temp set the root to the first node
@@ -102,9 +137,24 @@ class Kruskal_with_heap():
         t.DFS(root)
         print t.traverse
 
+def randomSourceSink(n):
+    source = random.randint(0,n-1)
+    sink = random.randint(0,n-1)
+    if source == sink:
+      sink += 1 # simply prevent source and sink are the same
+      sink %= n# for boundary condition
+    print "S:", source
+    print "T:", sink
+    return (source, sink)
+
 def main():
-    problem = Kruskal_with_heap(NUM_VERTEX)
-    problem.solve()
+    for i in range(5):
+        print "-- Run --",i
+        problem = Dijkstra_with_heap(graph.Graph_six_degree(NUM_VERTEX))
+        problem.setSourceSink(*randomSourceSink(NUM_VERTEX))
+        #problem.g.dump()
+        problem.solve()
+        print "-- End --", i
 
 if __name__ == '__main__':
     main()
