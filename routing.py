@@ -1,7 +1,8 @@
 import graph
 import heap
+import random
 
-NUM_VERTEX = 10
+NUM_VERTEX = 100
 
 def makeSet(v):
   return graph.Node(v)
@@ -42,10 +43,34 @@ class Dijkstra_with_heap(Dijkstra):
 class Kruskal_with_heap():
 
     def __init__(self, n):
-        self.g = graph.Graph_random_connect20(n)
+        self.g = graph.Graph_six_degree(n)
+
+        self.source = random.randint(0,n-1)
+        self.sink = random.randint(0,n-1)
+        if self.source == self.sink:
+          self.sink += 1 # simply prevent source and sink are the same
+        print "S:", self.source
+        print "T:", self.sink
+
+        self.amend_gap(self.source, self.sink)
+
         self.h= heap.Heap()
         for e in self.g:
             self.h.insert(e)
+
+    def amend_gap(self, v1, v2):
+
+        self.g.DFS(v1)
+        prev_v = v1
+        counter_added_edge = 0
+        for v in self.g.traverse:
+          if prev_v != v and self.g.getWeight(prev_v, v) == 0:
+            self.g.setWeight(prev_v, v, random.randint(graph.MIN_WEIGHT,\
+              graph.MAX_WEIGHT))
+            counter_added_edge += 1
+            #print "connect:",prev_v, v
+          prev_v = v
+        print "Edges added:",counter_added_edge
 
     def solve(self):
         num_vertex = NUM_VERTEX
@@ -74,10 +99,8 @@ class Kruskal_with_heap():
             root = r2
 
         print root
-        t.dump()
-        t.BFS(root)
+        t.DFS(root)
         print t.traverse
-
 
 def main():
     problem = Kruskal_with_heap(NUM_VERTEX)
