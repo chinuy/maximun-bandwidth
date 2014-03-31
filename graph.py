@@ -2,6 +2,9 @@
 import sys
 import random
 from collections import deque
+import profile
+
+sys.setrecursionlimit(10**6)
 
 DEGREE = 6
 MIN_WEIGHT = 1
@@ -59,6 +62,19 @@ class Graph:
                 if elm > 0:
                     count += 1
         return count
+
+    def amend_gap(self, v1, v2):
+
+        self.DFS(v1)
+        prev_v = v1
+        counter_added_edge = 0
+        for v in self.traverse:
+          if prev_v != v and self.getWeight(prev_v, v) == 0:
+            self.setWeight(prev_v, v, random.randint(MIN_WEIGHT, MAX_WEIGHT))
+            counter_added_edge += 1
+            #print "connect:",prev_v, v
+          prev_v = v
+        print "Edges added:",counter_added_edge
 
     def setWeight(self, v1, v2, weight = 1):
         if v2 > v1:
@@ -170,6 +186,7 @@ class Graph_six_degree(Graph):
         if total_edge < degree * n/2:
             raise Exception("Too few edges to meet the criteria")
 
+    @profile.timeit
     def connect(self):
         """
         repeat until all vertex meet the DEGREE
@@ -181,6 +198,7 @@ class Graph_six_degree(Graph):
                 self.generate_connection()
             i += 1
 
+    @profile.counted
     def generate_connection(self):
         # reset information
         self.degreeTable = [0 for i in range(self.num_vertex)]
@@ -224,8 +242,10 @@ class Graph_random_connect20(Graph):
 def main():
 
     g1 = Graph_six_degree(NUM_VERTEX)
-    g1.dump()
-    print g1.degreeTable
+    #g1.dump()
+    #print g1.degreeTable
+    print g1.connect.times
+    print g1.generate_connection.called
 
 if __name__ == '__main__':
     main()
