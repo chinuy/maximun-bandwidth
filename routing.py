@@ -3,7 +3,7 @@ import heap
 import random
 import sys
 
-NUM_VERTEX = 100
+NUM_VERTEX = 1000
 
 def makeSet(v):
   return graph.Node(v)
@@ -31,7 +31,6 @@ def union(v1, v2):
     v2.parent = v1
     v1.rank = v2.rank + 1
 
-
 class GraphProblem:
 
     def __init__(self, input_graph):
@@ -40,23 +39,6 @@ class GraphProblem:
     def setSourceSink(self, source, sink):
         self.source = source
         self.sink = sink
-
-        self.amend_gap(self.source, self.sink)
-
-    def amend_gap(self, v1, v2):
-
-        self.g.DFS(v1)
-        prev_v = v1
-        counter_added_edge = 0
-        for v in self.g.traverse:
-          if prev_v != v and self.g.getWeight(prev_v, v) == 0:
-            self.g.setWeight(prev_v, v, random.randint(graph.MIN_WEIGHT,\
-              graph.MAX_WEIGHT))
-            counter_added_edge += 1
-            #print "connect:",prev_v, v
-          prev_v = v
-        print "Edges added:",counter_added_edge
-
 
 class Dijkstra_without_heap(GraphProblem):
 
@@ -144,10 +126,10 @@ class Dijkstra_with_heap(GraphProblem):
 
 class Kruskal_with_heap(GraphProblem):
 
-
     def __init__(self, input_graph):
         GraphProblem.__init__(self, input_graph)
         self.h= heap.MaxHeap()
+
         for e in self.g:
             self.h.insert(e)
 
@@ -176,9 +158,9 @@ class Kruskal_with_heap(GraphProblem):
           if r2.rank > root.rank:
             root = r2
 
-        print root
-        t.DFS(root)
-        print t.traverse
+        #print root
+        #t.DFS(root)
+        #print t.traverse
 
 def randomSourceSink(n):
     source = random.randint(0,n-1)
@@ -193,7 +175,7 @@ def randomSourceSink(n):
 def main():
     for i in range(5):
         print "-- Run --",i
-        problem = Dijkstra_without_heap(graph.Graph_six_degree(NUM_VERTEX))
+        problem = Kruskal_with_heap(graph.Graph_random_connect20(NUM_VERTEX))
         problem.setSourceSink(*randomSourceSink(NUM_VERTEX))
         #problem.g.dump()
         problem.solve()
