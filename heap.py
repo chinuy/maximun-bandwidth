@@ -2,12 +2,11 @@ import random
 import sys
 import profile
 
+DEFAULT_CAPACITY = 32
 class Heap:
 
-    def __init__(self, capacity=None):
+    def __init__(self, capacity=DEFAULT_CAPACITY):
         # array item type: tuple, (id, value)
-        if not capacity:
-            capacity = 1
         self.array = [None] * (capacity+1)
 
         self.array[0] = (-1,-1)
@@ -18,7 +17,8 @@ class Heap:
 
     def __contains__(self, item):
         "Return True if item id is in"
-        for elm in self.array:
+        for i in range(len(self)):
+            elm = self.array[i+1]
             if item is elm[0]:
                 return True
         return False
@@ -28,6 +28,8 @@ class Heap:
 
     def insert(self, elm):
         self.len += 1
+        if len(self.array) <= len(self):
+            self.array.extend([None]*DEFAULT_CAPACITY)
         self.array[self.len] = elm
         i_child = len(self)
         i_parent = int(i_child/2)
@@ -45,8 +47,8 @@ class Heap:
             return
 
         root_index = 1
-        self.array[root_index] = self.array[-1]
-        del self.array[-1]
+        self.array[root_index] = self.array[self.len]
+        self.array[self.len] = None
         self.len -= 1
         self.downAdjust(root_index)
 
@@ -74,10 +76,8 @@ class Heap:
 
 class MaxHeap(Heap):
 
-    def __init__(self, capacity):
+    def __init__(self, capacity=DEFAULT_CAPACITY):
         # array item type: tuple, (id, value)
-        if not capacity:
-            capacity = 1
         Heap.__init__(self, capacity)
         self.array[0] = (-1,sys.maxint)
 
