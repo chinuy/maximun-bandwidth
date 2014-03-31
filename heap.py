@@ -76,6 +76,8 @@ class MaxHeap(Heap):
 
     def __init__(self, capacity):
         # array item type: tuple, (id, value)
+        if not capacity:
+            capacity = 1
         Heap.__init__(self, capacity)
         self.array[0] = (-1,sys.maxint)
 
