@@ -1,14 +1,20 @@
 import random
 import sys
+import profile
 
 class Heap:
 
-    def __init__(self):
+    def __init__(self, capacity=None):
         # array item type: tuple, (id, value)
-        self.array = [(-1,-1)]
+        if not capacity:
+            capacity = 1
+        self.array = [None] * (capacity+1)
+
+        self.array[0] = (-1,-1)
+        self.len = 0
 
     def __len__(self):
-        return len(self.array) -1
+        return self.len
 
     def __contains__(self, item):
         "Return True if item id is in"
@@ -21,8 +27,9 @@ class Heap:
         return self.array[1]
 
     def insert(self, elm):
-        self.array.append(elm)
-        i_child = len(self.array) -1
+        self.len += 1
+        self.array[self.len] = elm
+        i_child = len(self)
         i_parent = int(i_child/2)
         if i_child > 2: # more than one element
             self.adjust(i_parent, i_child)
@@ -40,6 +47,7 @@ class Heap:
         root_index = 1
         self.array[root_index] = self.array[-1]
         del self.array[-1]
+        self.len -= 1
         self.downAdjust(root_index)
 
     def downAdjust(self, index):
@@ -51,7 +59,7 @@ class Heap:
         smaller_index = index*2
         c1 = self.array[index*2][1]
         c2 = sys.maxsize
-        if len(self.array) > index*2 +1:
+        if len(self) > index*2 +1:
             c2 = self.array[index*2+1][1]
         if c1 > c2:
             smaller_index = index*2 +1
@@ -66,9 +74,10 @@ class Heap:
 
 class MaxHeap(Heap):
 
-    def __init__(self):
+    def __init__(self, capacity):
         # array item type: tuple, (id, value)
-        self.array = [(-1,sys.maxint)]
+        Heap.__init__(self, capacity)
+        self.array[0] = (-1,sys.maxint)
 
     def getMin(self):
         raise Exception("MaxHeap doesn't support getMin()")
@@ -89,7 +98,7 @@ class MaxHeap(Heap):
         larger_index = index*2
         c1 = self.array[index*2][1]
         c2 = sys.maxsize
-        if len(self.array) > index*2 +1:
+        if len(self) > index*2 +1:
             c2 = self.array[index*2+1][1]
         if c1 > c2:
             larger_index = index*2 +1
@@ -100,24 +109,42 @@ class MaxHeap(Heap):
 
 def main():
 
-    h = MaxHeap()
-    x = range(10)
-    random.shuffle(x)
-    x = zip(range(10), [1,3,5,8,1,2,2,2,2,5])
-    for i in x:
-        h.insert(i)
-    print h.array
-    print "-- Test contains()"
-    print 10 in h
-    print 1 in h
-    print "-- DELETE"
-    for i in range(len(h)):
-        h.delete_root()
-    print h.array
+    @profile.timeit
+    def insert():
+        print "-- Inserting"
+        for i in x:
+            h.insert(i)
+
+    @profile.timeit
+    def contains():
+        print "-- Test contains()"
+        print 10 in h
+        print 1 in h
+
+    @profile.timeit
+    def delete():
+        print "-- DELETE"
+        for i in range(len(h)):
+            h.delete_root()
+        print h.array
+
+    #x = zip(range(10), [1,3,5,8,1,2,2,2,2,5])
+    n = 5000 * 5000
+    h = MaxHeap(n)
+    x = zip(range(n), range(n))
+    #random.shuffle(x)
+    insert()
+    print insert.times
+    print len(h)
+    contains()
+    print contains.times
+    delete()
+    print delete.times
     try:
         h.getMin()
     except Exception as e:
         print e
+
 
 if __name__ == '__main__':
     main()
