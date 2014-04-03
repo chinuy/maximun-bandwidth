@@ -9,11 +9,11 @@ class Heap:
         # array item type: tuple, (id, value)
         self.array = [None] * (capacity+1)
 
-        self.array[0] = (-1,-1)
-        self.len = 0
+        self.array[0] = (-1,None)
+        self.length = 0
 
     def __len__(self):
-        return self.len
+        return self.length
 
     def __contains__(self, item):
         "Return True if item id is in"
@@ -28,30 +28,29 @@ class Heap:
 
     @profile.timeit
     def insert(self, elm):
-        self.len += 1
+        self.length += 1
         if len(self.array) <= len(self):
             self.array.extend([None]*DEFAULT_CAPACITY)
-        self.array[self.len] = elm
+        self.array[self.length] = elm
         i_child = len(self)
         i_parent = int(i_child/2)
-        if i_child > 2: # more than one element
-            self.adjust(i_parent, i_child)
+        self.adjust(i_parent, i_child)
 
     def adjust(self, i_parent, i_child):
-        #print self.array, i_parent, i_child
+        if i_parent == 0:
+            return
         if self.array[i_parent][1] > self.array[i_child][1]:
             self.swap(i_parent, i_child)
             self.adjust(int(i_parent/2), i_parent)
 
-    @profile.timeit
     def delete_root(self):
         if len(self) < 1:
             return
 
         root_index = 1
-        self.array[root_index] = self.array[self.len]
-        self.array[self.len] = None
-        self.len -= 1
+        self.array[root_index] = self.array[self.length]
+        self.array[self.length] = None
+        self.length -= 1
         self.downAdjust(root_index)
 
     def delete(self, item):
@@ -77,7 +76,7 @@ class Heap:
         smaller_index = index*2
         c1 = self.array[index*2][1]
         c2 = sys.maxsize
-        if len(self) > index*2 +1:
+        if len(self) > index*2:
             c2 = self.array[index*2+1][1]
         if c1 > c2:
             smaller_index = index*2 +1
@@ -95,7 +94,7 @@ class MaxHeap(Heap):
     def __init__(self, capacity=DEFAULT_CAPACITY):
         # array item type: tuple, (id, value)
         Heap.__init__(self, capacity)
-        self.array[0] = (-1,sys.maxint)
+        self.array[0] = (-1,None)
 
     def getMin(self):
         raise Exception("MaxHeap doesn't support getMin()")
@@ -105,6 +104,8 @@ class MaxHeap(Heap):
 
     @profile.counted
     def adjust(self, i_parent, i_child):
+        if i_parent == 0:
+            return
         if self.array[i_parent][1] < self.array[i_child][1]:
             self.swap(i_parent, i_child)
             self.adjust(int(i_parent/2), i_parent)
@@ -117,10 +118,10 @@ class MaxHeap(Heap):
 
         larger_index = index*2
         c1 = self.array[index*2][1]
-        c2 = sys.maxsize
-        if len(self) > index*2 +1:
+        c2 = 0
+        if len(self) > index*2:
             c2 = self.array[index*2+1][1]
-        if c1 > c2:
+        if c1 < c2:
             larger_index = index*2 +1
 
         if self.array[index][1] < self.array[larger_index][1]:
@@ -147,11 +148,31 @@ def main():
         for i in range(len(h)):
             h.delete_root()
 
-    test_input = zip(range(10), [1,3,5,8,1,2,2,2,2,5])
-    total = 50000000
-    _bin = 100
-    for i in range(_bin):
-        #i = _bin - i
+    NUM_TEST = 1
+    MIN_WEIGHT = 100000000
+    MAX_WEIGHT = 1000000000
+    r = []
+    for i in range(NUM_TEST):
+        r.append(random.randint(MIN_WEIGHT, MAX_WEIGHT))
+    test_input = zip(range(-NUM_TEST-10, -10, 1), r)
+
+    """
+    h = MaxHeap(NUM_TEST)
+    for t in test_input:
+        h.insert(t)
+    print h.array
+    while(len(h)>0):
+        r = h.getMax()
+        h.delete_root()
+        print r[1],
+    print
+    return
+    """
+
+    total = 5000000
+    _bin = 10
+    for i in range(1,_bin+1):
+        i = _bin - i +1
         n = int(total/_bin*i)
         h = MaxHeap(n)
         x = zip(range(n), range(n))
@@ -160,12 +181,15 @@ def main():
 
         contains()
 
+        total_insert_time = 0
+        prev_counter = h.adjust.called
         for t in test_input:
             h.insert(t)
-            print h.insert.times
+            total_insert_time += h.insert.times
+        #print n, total_insert_time/len(test_input)
+        print n, float(h.adjust.called - prev_counter)/len(test_input)
 
-        delete()
-        print n, insert.times, contains.times, delete.times ,h.adjust.called, h.downAdjust.called
+        #print n, insert.times, contains.times, delete.times ,h.adjust.called, h.downAdjust.called
 
     try:
         h.getMin()
