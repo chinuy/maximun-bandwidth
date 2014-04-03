@@ -146,7 +146,7 @@ class Kruskal_with_heap(GraphProblem):
           ((v1, v2), weight) = e
           self.h.delete_root()
           if weight == 0:
-            continue
+            break
           r1 = find(v[v1])
           r2 = find(v[v2])
           if r1 != r2:

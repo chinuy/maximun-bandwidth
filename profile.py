@@ -5,7 +5,7 @@ def timeit(fn):
         ts = time.time()
         result = fn(*args, **kw)
         te = time.time()
-        timed.times = '%2.2f' % (te - ts)
+        timed.times = (te - ts)
         return result
     return timed
 
