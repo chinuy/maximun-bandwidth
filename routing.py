@@ -2,8 +2,7 @@ import graph
 import heap
 import random
 import sys
-
-NUM_VERTEX = 1000
+import profile
 
 def makeSet(v):
   return graph.Node(v)
@@ -35,6 +34,7 @@ class GraphProblem:
 
     def __init__(self, input_graph):
         self.g = input_graph
+        self.count = 0
 
     def setSourceSink(self, source, sink):
         self.source = source
@@ -45,7 +45,9 @@ class Dijkstra_without_heap(GraphProblem):
     def __init__(self, input_graph):
         GraphProblem.__init__(self, input_graph)
 
+    @profile.timeit
     def solve(self):
+        self.count = 0
         frige = []
         self.g.parent = []
         bandwidth = []
@@ -66,6 +68,7 @@ class Dijkstra_without_heap(GraphProblem):
             _max_b = -sys.maxint
             _max_i = None
             for i in range(len(frige)):
+                self.count +=1 # COUNTER
                 if _max_b < bandwidth[frige[i]]:
                     _max_b = bandwidth[frige[i]]
                     _max_i= i
@@ -84,14 +87,16 @@ class Dijkstra_without_heap(GraphProblem):
                     bandwidth[w] = min(bandwidth[u], bandwidth_of_u_w)
 
         self.g.traceback(self.source, self.sink)
-        print self.g.traverse
+        #print self.g.traverse
 
 class Dijkstra_with_heap(GraphProblem):
 
     def __init__(self, input_graph):
         GraphProblem.__init__(self, input_graph)
 
+    @profile.timeit
     def solve(self):
+        self.count = 0
         frige = heap.MaxHeap()
         self.g.parent = []
         bandwidth = []
@@ -115,6 +120,7 @@ class Dijkstra_with_heap(GraphProblem):
                 if bandwidth[w] == -sys.maxint:
                     self.g.parent[w] = u
                     bandwidth[w] = min(bandwidth[u], bandwidth_of_u_w)
+                    frige.delete(w)
                     frige.insert((w, bandwidth[w]))
                 elif w in frige and bandwidth[w] < min(bandwidth[u],\
                         bandwidth_of_u_w):
@@ -122,7 +128,8 @@ class Dijkstra_with_heap(GraphProblem):
                     bandwidth[w] = min(bandwidth[u], bandwidth_of_u_w)
 
         self.g.traceback(self.source, self.sink)
-        print self.g.traverse
+        self.count = frige.count
+        #print self.g.traverse
 
 class Kruskal_with_heap(GraphProblem):
 
@@ -133,7 +140,9 @@ class Kruskal_with_heap(GraphProblem):
         for e in self.g:
             self.h.insert(e)
 
+    @profile.timeit
     def solve(self):
+        self.count =0 # COUNTER
         t = graph.Graph(self.g.num_vertex)
 
         v = []
@@ -142,6 +151,7 @@ class Kruskal_with_heap(GraphProblem):
 
         root = v[0] #temp set the root to the first node
         while len(self.h) > 0:
+          self.count +=1 # COUNTER
           e = self.h.getMax()
           ((v1, v2), weight) = e
           self.h.delete_root()
@@ -157,6 +167,7 @@ class Kruskal_with_heap(GraphProblem):
             root = r1
           if r2.rank > root.rank:
             root = r2
+        self.count = self.h.count
 
         #print root
         #t.DFS(root)
@@ -168,18 +179,67 @@ def randomSourceSink(n):
     if source == sink:
       sink += 1 # simply prevent source and sink are the same
       sink %= n# for boundary condition
-    print "S:", source
-    print "T:", sink
+    #print "S:", source
+    #print "T:", sink
     return (source, sink)
 
 def main():
-    for i in range(5):
-        print "-- Run --",i
-        problem = Kruskal_with_heap(graph.Graph_random_connect20(NUM_VERTEX))
-        problem.setSourceSink(*randomSourceSink(NUM_VERTEX))
-        #problem.g.dump()
-        problem.solve()
-        print "-- End --", i
+
+    num_vertex = 5000
+    _bin = 10
+
+    def test_various_n():
+      expected_num_edge = num_vertex * 500 * 2
+      for i in range(_bin):
+          i = _bin - i +1
+          n = int(num_vertex/_bin*i)
+          ratio = float(expected_num_edge) / n / n
+          g = graph.Graph_random_connect(n, ratio)
+          source_sink = randomSourceSink(n)
+          g.amend_gap(*source_sink)
+
+          problem = Kruskal_with_heap(g)
+          problem.setSourceSink(*source_sink)
+          #problem.g.dump()
+          problem.solve()
+          print n, len(problem.g),problem.solve.times, ratio
+      return
+
+    def test_various_n():
+      for i in range(5):
+          g = graph.Graph_random_connect(num_vertex, 0.05 * i)
+          source_sink = randomSourceSink(num_vertex)
+          g.amend_gap(*source_sink)
+
+          problem = Kruskal_with_heap(g)
+          problem.setSourceSink(*source_sink)
+          #problem.g.dump()
+          problem.solve()
+          print len(problem.g),problem.solve.times
+      return
+
+    def test_Dijkstra():
+      for i in range(1,10):
+        t = [0,0]
+        for j in range(10):
+          g = graph.Graph_random_connect(num_vertex, 0.001 * i)
+          g.BFS(1)
+          source_sink = (g.traverse[0], g.traverse[-1])
+          g.amend_gap(*source_sink)
+
+          problem1 = Dijkstra_without_heap(g)
+          problem1.setSourceSink(*source_sink)
+          problem1.solve()
+
+          problem2 = Dijkstra_with_heap(g)
+          problem2.setSourceSink(*source_sink)
+          problem2.solve()
+
+          t[0] += problem1.solve.times
+          t[1] += problem2.solve.times
+        print len(g),t[0]/10, t[1]/10
+      return
+    test_Dijkstra()
 
 if __name__ == '__main__':
     main()
