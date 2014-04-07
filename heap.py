@@ -11,6 +11,7 @@ class Heap:
 
         self.array[0] = (-1,None)
         self.length = 0
+        self.count = 0
 
     def __len__(self):
         return self.length
@@ -57,15 +58,18 @@ class Heap:
         """
         delete specific item
         1. find item index
-        2. swap item with root
-        3. remove item at the root
+        2. swap item with last item
+        3. remove item at the last item
         4. start from item index, adjust up
         """
         for i in range(len(self)):
             elm = self.array[i+1]
-            if item is elm[0]:
-                self.swap(i+1, len(self)-1)
+            if item == elm[0]:
+                self.swap(i+1, len(self))
+                self.array[len(self)] = None
+                self.length -=1
                 self.adjust(int((i+1)/2), i+1)
+                return
 
     def downAdjust(self, index):
         # check if index has been the lowest leave
@@ -106,6 +110,7 @@ class MaxHeap(Heap):
     def adjust(self, i_parent, i_child):
         if i_parent == 0:
             return
+        self.count +=1 # COUNTER
         if self.array[i_parent][1] < self.array[i_child][1]:
             self.swap(i_parent, i_child)
             self.adjust(int(i_parent/2), i_parent)
@@ -116,6 +121,7 @@ class MaxHeap(Heap):
         if index*2 > len(self):
             return
 
+        self.count +=1 # COUNTER
         larger_index = index*2
         c1 = self.array[index*2][1]
         c2 = 0
@@ -148,8 +154,8 @@ def main():
         for i in range(len(h)):
             h.delete_root()
 
-    NUM_TEST = 1
-    MIN_WEIGHT = 100000000
+    NUM_TEST = 20
+    MIN_WEIGHT = 10000000
     MAX_WEIGHT = 1000000000
     r = []
     for i in range(NUM_TEST):
@@ -161,6 +167,7 @@ def main():
     for t in test_input:
         h.insert(t)
     print h.array
+    h.delete(-20)
     while(len(h)>0):
         r = h.getMax()
         h.delete_root()
@@ -169,7 +176,7 @@ def main():
     return
     """
 
-    total = 5000000
+    total = 50000
     _bin = 10
     for i in range(1,_bin+1):
         i = _bin - i +1
@@ -182,12 +189,17 @@ def main():
         contains()
 
         total_insert_time = 0
+        total_call = 0
         prev_counter = h.adjust.called
         for t in test_input:
             h.insert(t)
             total_insert_time += h.insert.times
+            #print h.adjust.called , prev_counter
+            total_call += h.adjust.called - prev_counter
+            #h.delete(t[0])
+            prev_counter = h.adjust.called
         #print n, total_insert_time/len(test_input)
-        print n, float(h.adjust.called - prev_counter)/len(test_input)
+        print n, float(total_call)/len(test_input)
 
         #print n, insert.times, contains.times, delete.times ,h.adjust.called, h.downAdjust.called
 
