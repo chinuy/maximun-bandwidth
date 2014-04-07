@@ -8,7 +8,7 @@ sys.setrecursionlimit(10**6)
 
 DEGREE = 6
 MIN_WEIGHT = 1
-MAX_WEIGHT = 50
+MAX_WEIGHT = 500000
 NUM_VERTEX = 5000
 
 class Node:
@@ -74,7 +74,7 @@ class Graph:
             counter_added_edge += 1
             #print "connect:",prev_v, v
           prev_v = v
-        print "Edges added:",counter_added_edge
+        return "Edges added:",counter_added_edge
 
     def setWeight(self, v1, v2, weight = 1):
         if v2 > v1:
@@ -154,16 +154,13 @@ class Graph:
       self.traverse = [v]
       self.color[v] = 'black'
 
-      for i in v_list:
-        if self.color[i] == 'white':
-          self.traverse.append(i)
-          q.extend(self.getNeighborVertex(i))
-        while len(q) > 0:
-          w = q.popleft()
+      while len(q) > 0:
+        v = q.popleft()
+        for w in self.getNeighborVertex(w):
           if self.color[w] == 'white':
             self.traverse.append(w)
             self.color[w] = 'black'
-            q.extend(self.getNeighborVertex(v))
+            q.extend(w)
 
     def traceback(self, s, t):
         v = t
@@ -235,6 +232,24 @@ class Graph_random_connect20(Graph):
         for v in range(self.num_vertex):
             for u in range(v):
                 if random.random() < 0.2:
+                    self.setWeight(v, u, random.randint(MIN_WEIGHT, MAX_WEIGHT))
+                    self.degreeTable[v] +=1
+                    self.degreeTable[u] +=1
+
+class Graph_random_connect(Graph):
+
+    def __init__(self, n, ratio):
+        Graph.__init__(self, n)
+        self.ratio = ratio
+        self.connect()
+
+    def connect(self):
+        """
+        randomly connect to other vertexes by ratio
+        """
+        for v in range(self.num_vertex):
+            for u in range(v):
+                if random.random() < self.ratio:
                     self.setWeight(v, u, random.randint(MIN_WEIGHT, MAX_WEIGHT))
                     self.degreeTable[v] +=1
                     self.degreeTable[u] +=1
